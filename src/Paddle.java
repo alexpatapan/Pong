@@ -14,7 +14,7 @@ public class Paddle extends Rectangle {
         super(x, y, width, height);
         this.y = y;
         timer = new paddleTimer();
-        //timer.start();
+
 
     }
 

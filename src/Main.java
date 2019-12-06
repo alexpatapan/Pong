@@ -27,11 +27,19 @@ public class Main extends Application {
     Paddle left;
     Paddle right;
 
+    final int stageWidth = 700;
+    final int stageHeight = 500;
+    final int paddleWidth = 15;
+    final int paddleHeight = 60;
 
     public static void main(String[] args) {
         launch(args);
     }
 
+    /**
+     * Display the start screen with the option to play
+     * @param stage The main stage which the game runs on
+     */
     public void start(Stage stage) {
         stage.setTitle("Pong !");
         stage.setResizable(false);
@@ -46,7 +54,7 @@ public class Main extends Application {
         });
 
         border.getChildren().add(btn);
-        scene = new Scene(border, 700, 500);
+        scene = new Scene(border, stageWidth, stageHeight);
 
         stage.setScene(scene);
         stage.show();
@@ -55,10 +63,13 @@ public class Main extends Application {
 
     }
 
+    /**
+     * Run an instance of the game
+     */
     private void run() {
         ball = new Ball(10, 200, 200);
-        right = new Paddle(665, 60, 15, 60);
-        left = new Paddle(15, 60, 15, 60);
+        right = new Paddle(670, 60, paddleWidth, paddleHeight);
+        left = new Paddle(15, 60, paddleWidth, paddleHeight);
 
         border.getChildren().addAll(ball, left, right);
 
@@ -66,11 +77,13 @@ public class Main extends Application {
         ballTimer.start();
 
         controls();
-
     }
 
+    /**
+     * Setup the controls for the players to move the paddles
+     */
     private void controls() {
-
+        // Enable paddleTimers on keypress
         scene.setOnKeyPressed(e -> {
             switch (e.getCode().toString()) {
                 case "DOWN":
@@ -90,7 +103,7 @@ public class Main extends Application {
                     left.direction = true;
             }
         });
-
+        // Turn off paddleTimers
         scene.setOnKeyReleased(e -> {
             if (e.getCode().toString().equals("DOWN") ||
                     e.getCode().toString().equals("UP")) {
@@ -104,16 +117,13 @@ public class Main extends Application {
 
     /**
      * A class to animate the balls movement across the screen
-     */
+    */
     private class BallTimer extends AnimationTimer {
         private boolean flip = false;   // 0 = moving right, 1 = moving left
+        private int lastHitCoordinates[];
+
         @Override
         public void handle(long now) {
-            doHandle();
-        }
-
-        private void doHandle() {
-
             if (flip) {
                 ball.setCenterX(ball.getX() - 2);
                 ball.setX(ball.getX() - 2);
@@ -122,12 +132,33 @@ public class Main extends Application {
                 ball.setX(ball.getX() + 2);
             }
 
-            if (ball.getX() > 700 || ball.getX() < 0) {
+            if (checkPaddleCollision()) {
+                // get angle
                 flip = !flip;
             }
         }
+
     }
 
+    /**
+     * Check to see if the ball has hit the paddle
+     * @return true if the ball has hit the paddle, else false
+     */
+    private boolean checkPaddleCollision() {
+        if (ball.getX() == 2*paddleWidth) {
+            if (ball.getY() > left.getY() && ball.getY() < left.getY() + paddleHeight) {
+                return true;
+            }
+        }
+
+        if (ball.getX() == stageWidth - 2*paddleWidth) {
+            if (ball.getY() > right.getY() && ball.getY() < right.getY() + paddleHeight) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }
 
 
