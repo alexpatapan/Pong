@@ -29,12 +29,17 @@ public class Paddle extends Rectangle {
         }
 
         private void doHandle() {
+
            if (direction) {
-               y += 2;
-               Paddle.this.setY(y);
+               if (y < 414) {
+                   y += 10;
+                   Paddle.this.setY(y);
+               }
            } else {
-               y -= 2;
-               Paddle.this.setY(y);
+               if (y > 5) {
+                   y -= 10;
+                   Paddle.this.setY(y);
+               }
            }
         }
     }

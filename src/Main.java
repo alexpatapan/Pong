@@ -27,10 +27,11 @@ public class Main extends Application {
     Paddle left;
     Paddle right;
 
-    final int stageWidth = 700;
-    final int stageHeight = 500;
-    final int paddleWidth = 15;
-    final int paddleHeight = 60;
+    private final int stageWidth = 700;
+    private final int stageHeight = 500;
+    private final int paddleWidth = 15;
+    private final int paddleHeight = 60;
+    private int lastHitCoordinates[] = new int[2];
 
     public static void main(String[] args) {
         launch(args);
@@ -60,6 +61,8 @@ public class Main extends Application {
         stage.show();
         stage.setWidth(700);
         stage.setHeight(500);
+        lastHitCoordinates[0] = 200;
+        lastHitCoordinates[1] = 200;
 
     }
 
@@ -68,8 +71,8 @@ public class Main extends Application {
      */
     private void run() {
         ball = new Ball(10, 200, 200);
-        right = new Paddle(670, 60, paddleWidth, paddleHeight);
-        left = new Paddle(15, 60, paddleWidth, paddleHeight);
+        right = new Paddle(670, 190, paddleWidth, paddleHeight);
+        left = new Paddle(15, 190, paddleWidth, paddleHeight);
 
         border.getChildren().addAll(ball, left, right);
 
@@ -103,6 +106,7 @@ public class Main extends Application {
                     left.direction = true;
             }
         });
+
         // Turn off paddleTimers
         scene.setOnKeyReleased(e -> {
             if (e.getCode().toString().equals("DOWN") ||
@@ -120,21 +124,24 @@ public class Main extends Application {
     */
     private class BallTimer extends AnimationTimer {
         private boolean flip = false;   // 0 = moving right, 1 = moving left
-        private int lastHitCoordinates[];
-
+        private int moveY = -1;
+        private int moveX = 2;
         @Override
         public void handle(long now) {
-            if (flip) {
-                ball.setCenterX(ball.getX() - 2);
-                ball.setX(ball.getX() - 2);
-            } else {
-                ball.setCenterX(ball.getX() + 2);
-                ball.setX(ball.getX() + 2);
-            }
+            moveY = checkBoundary(moveY);
+
+            moveBall(flip, moveX, moveY);
 
             if (checkPaddleCollision()) {
-                // get angle
+                //get angle
+                moveY = calcDirection(flip, moveY);
+
+
                 flip = !flip;
+            }
+
+            if (ball.getX() < 0 || ball.getX() > stageWidth) {
+                ball.setX(200);
             }
         }
 
@@ -158,6 +165,49 @@ public class Main extends Application {
         }
 
         return false;
+    }
+
+    /**
+     * A method to move the ball
+     * @param flip
+     */
+    private void moveBall(boolean flip, int x, int y) {
+        if (flip) {
+            ball.setCenterX(ball.getX() - x);
+            ball.setX(ball.getX() - x);
+            ball.setCenterY(ball.getY() - y);
+            ball.setY(ball.getY() - y);
+        } else {
+            ball.setCenterX(ball.getX() + x);
+            ball.setX(ball.getX() + x);
+            ball.setCenterY(ball.getY() - y);
+            ball.setY(ball.getY() - y);
+        }
+    }
+
+    private int calcDirection(boolean flip, int moveY) {
+
+        int paddleCentre;
+
+        if (flip) {
+            paddleCentre = (int) left.getY() + paddleHeight / 2;
+        } else {
+            paddleCentre = (int) right.getY() + paddleHeight / 2;
+        }
+
+        int distance = (int) ball.getCenterY() - paddleCentre;
+
+        if (Math.abs(distance) < 5 ) {
+            return 0;
+        }
+        return -1* (distance / 5);
+
+    }
+
+    private int checkBoundary(int moveY) {
+        if (ball.getY() + 2*ball.getRadius() > 490 || ball.getY() < 10) {
+            return moveY * -1;
+        } else return moveY;
     }
 }
 
