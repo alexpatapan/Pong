@@ -2,7 +2,9 @@
 
 Currently still in development. 
 
-Basic functionality is currently completed. Following functionality is still being developed:
-  - Sound Effects
+Included Functionality:
+  - Sound effects
   - Scoring system
-  - Difficulty Levels
+
+The following functionality is still being developed:
+  - Multiple Difficulty Levels
