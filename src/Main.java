@@ -2,11 +2,15 @@ import javafx.application.Application;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.*;
+import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
@@ -18,14 +22,17 @@ import javafx.scene.control.Button;
 import javafx.stage.Stage;
 import javafx.animation.AnimationTimer;
 
+import java.io.File;
+import javafx.util.Duration;
+
 
 public class Main extends Application {
 
     Pane border = new Pane();
     Scene scene;
     Ball ball;
-    Paddle left;
-    Paddle right;
+    Paddle left, right;
+    Label lscore, rscore;
 
     private final int stageWidth = 700;
     private final int stageHeight = 500;
@@ -64,17 +71,30 @@ public class Main extends Application {
         lastHitCoordinates[0] = 200;
         lastHitCoordinates[1] = 200;
 
+        String startup = "sounds/Beep13.wav";
+        Media playSound = new Media(new File(startup).toURI().toString());
+        MediaPlayer mediaPlayer = new MediaPlayer(playSound);
+        mediaPlayer.play();
     }
 
     /**
      * Run an instance of the game
      */
     private void run() {
-        ball = new Ball(10, 200, 200);
+        ball = new Ball(10, 350, 250);
         right = new Paddle(670, 190, paddleWidth, paddleHeight);
         left = new Paddle(15, 190, paddleWidth, paddleHeight);
 
-        border.getChildren().addAll(ball, left, right);
+        lscore = new Label("0");
+        lscore.setLayoutX(60);
+        lscore.setLayoutY(20);
+        lscore.setFont(new Font("Arial", 27));
+        rscore = new Label("0");
+        rscore.setLayoutX(630);
+        rscore.setLayoutY(20);
+        rscore.setFont(new Font("Arial", 27));
+
+        border.getChildren().addAll(ball, left, right, lscore, rscore);
 
         AnimationTimer ballTimer = new BallTimer();
         ballTimer.start();
@@ -126,22 +146,43 @@ public class Main extends Application {
         private boolean flip = false;   // 0 = moving right, 1 = moving left
         private int moveY = -1;
         private int moveX = 2;
+
+        String paddleHit = "sounds/paddle.wav";
+        Media paddleSound = new Media(new File(paddleHit).toURI().toString());
+        MediaPlayer playPaddleSound = new MediaPlayer(paddleSound);
+
+       // private val explosion = Media(App::class.java.getResource("/bombs/explosion.mp3").toString())
+
         @Override
         public void handle(long now) {
             moveY = checkBoundary(moveY);
-
+            playPaddleSound.stop();
             moveBall(flip, moveX, moveY);
 
             if (checkPaddleCollision()) {
                 //get angle
                 moveY = calcDirection(flip, moveY);
-
+                playPaddleSound.play();
 
                 flip = !flip;
+            } else {
+                playPaddleSound.stop();
             }
 
             if (ball.getX() < 0 || ball.getX() > stageWidth) {
-                ball.setX(200);
+
+                if (ball.getX() < 0) {
+                    rscore.setText(Integer.toString(Integer.parseInt(rscore.getText()) + 1));
+                } else {
+                    lscore.setText(Integer.toString(Integer.parseInt(rscore.getText()) + 1));
+                }
+
+                // reset ball
+                ball.setX(350);
+                ball.setY(250);
+                moveY = (int) (Math.random()*7-3);
+                flip = (Math.random() < 0.5);
+                System.out.println(moveY);
             }
         }
 
@@ -169,7 +210,7 @@ public class Main extends Application {
 
     /**
      * A method to move the ball
-     * @param flip
+     * @param flip The current direction of the ball
      */
     private void moveBall(boolean flip, int x, int y) {
         if (flip) {
@@ -200,7 +241,7 @@ public class Main extends Application {
         if (Math.abs(distance) < 5 ) {
             return 0;
         }
-        return -1* (distance / 5);
+        return -1 * (distance / 5);
 
     }
 

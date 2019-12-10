@@ -2,7 +2,11 @@ import javafx.animation.AnimationTimer;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.GridPane;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 import javafx.scene.shape.Rectangle;
+
+import java.io.File;
 
 public class Paddle extends Rectangle {
 
@@ -32,12 +36,12 @@ public class Paddle extends Rectangle {
 
            if (direction) {
                if (y < 414) {
-                   y += 10;
+                   y += 6;
                    Paddle.this.setY(y);
                }
            } else {
                if (y > 5) {
-                   y -= 10;
+                   y -= 6;
                    Paddle.this.setY(y);
                }
            }
