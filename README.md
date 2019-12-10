@@ -1,5 +1,7 @@
 # Pong
 
+![](playing.gif)
+
 Currently still in development. 
 
 Included Functionality:
